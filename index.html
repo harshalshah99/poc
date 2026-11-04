@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Option Range Calculator</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --navy: #172b4d;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #15803d;
+      --red: #b91c1c;
+      --text: #1f2937;
+      --muted: #64748b;
+      --border: #dbe3ee;
+      --background: #f5f7fb;
+      --white: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: var(--background);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .card {
+      width: min(100%, 620px);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--white);
+      box-shadow: 0 16px 40px rgba(23, 43, 77, 0.1);
+    }
+
+    header {
+      padding: 30px 32px 26px;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.5rem, 3vw, 1.9rem);
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+
+    main {
+      padding: 30px 32px 34px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 9px;
+      color: var(--navy);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    input,
+    button {
+      min-height: 48px;
+      border-radius: 9px;
+      font: inherit;
+    }
+
+    input {
+      width: 100%;
+      padding: 0 14px;
+      border: 1px solid #b8c5d6;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    button {
+      padding: 0 22px;
+      border: 0;
+      background: var(--blue);
+      color: var(--white);
+      cursor: pointer;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .hint {
+      margin: 9px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .result {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fbfcfe;
+    }
+
+    .result.ce {
+      border-top: 4px solid var(--green);
+    }
+
+    .result.pe {
+      border-top: 4px solid var(--red);
+    }
+
+    .result-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 17px;
+      color: var(--navy);
+      font-weight: 800;
+    }
+
+    .tag {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+    }
+
+    .ce .tag {
+      background: #dcfce7;
+      color: var(--green);
+    }
+
+    .pe .tag {
+      background: #fee2e2;
+      color: var(--red);
+    }
+
+    .result-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e8edf4;
+      font-size: 0.88rem;
+    }
+
+    .result-line:last-child {
+      border-bottom: 0;
+    }
+
+    .result-line span {
+      color: var(--muted);
+    }
+
+    .result-line strong {
+      color: var(--navy);
+      text-align: right;
+    }
+
+    .error {
+      min-height: 20px;
+      margin: 9px 0 0;
+      color: var(--red);
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 520px) {
+      header,
+      main {
+        padding-left: 22px;
+        padding-right: 22px;
+      }
+
+      .input-row,
+      .results {
+        grid-template-columns: 1fr;
+      }
+
+      .input-row {
+        display: grid;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="card" aria-labelledby="page-title">
+    <header>
+      <h1 id="page-title">Option Range Calculator</h1>
+      <p>Calculate the daily 1% upper and lower range from an index value.</p>
+    </header>
+
+    <main>
+      <form id="range-form" novalidate>
+        <label for="index-value">Index value</label>
+        <div class="input-row">
+          <input id="index-value" name="index-value" type="number" min="0.01" step="any"
+            value="21000" placeholder="Enter an index value" required>
+          <button type="submit">Calculate range</button>
+        </div>
+        <p class="hint">The nearest strike is rounded to the closest multiple of 50.</p>
+        <p id="error-message" class="error" role="alert" aria-live="polite"></p>
+      </form>
+
+      <div class="results" aria-live="polite">
+        <article class="result ce">
+          <div class="result-title">Upper bound <span class="tag">CE</span></div>
+          <div class="result-line"><span>Calculated ( +1% )</span><strong id="upper-exact">—</strong></div>
+          <div class="result-line"><span>Nearest strike</span><strong id="upper-strike">—</strong></div>
+        </article>
+        <article class="result pe">
+          <div class="result-title">Lower bound <span class="tag">PE</span></div>
+          <div class="result-line"><span>Calculated ( −1% )</span><strong id="lower-exact">—</strong></div>
+          <div class="result-line"><span>Nearest strike</span><strong id="lower-strike">—</strong></div>
+        </article>
+      </div>
+    </main>
+  </section>
+
+  <script>
+    const form = document.getElementById("range-form");
+    const input = document.getElementById("index-value");
+    const errorMessage = document.getElementById("error-message");
+    const formatter = new Intl.NumberFormat("en-IN", {
+      maximumFractionDigits: 2
+    });
+
+    function formatValue(value) {
+      return formatter.format(value);
+    }
+
+    function calculateRange(value) {
+      const upper = value * 1.01;
+      const lower = value * 0.99;
+      return {
+        upper,
+        lower,
+        upperStrike: Math.round(upper / 50) * 50,
+        lowerStrike: Math.round(lower / 50) * 50
+      };
+    }
+
+    function render(value) {
+      const range = calculateRange(value);
+      document.getElementById("upper-exact").textContent = formatValue(range.upper);
+      document.getElementById("upper-strike").textContent = `${formatValue(range.upperStrike)} CE`;
+      document.getElementById("lower-exact").textContent = formatValue(range.lower);
+      document.getElementById("lower-strike").textContent = `${formatValue(range.lowerStrike)} PE`;
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const value = Number(input.value);
+
+      if (!Number.isFinite(value) || value <= 0) {
+        errorMessage.textContent = "Please enter a number greater than zero.";
+        input.focus();
+        return;
+      }
+
+      errorMessage.textContent = "";
+      render(value);
+    });
+
+    render(Number(input.value));
+  </script>
+</body>
+</html>
